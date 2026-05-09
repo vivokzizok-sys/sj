@@ -711,4 +711,4 @@ setInterval(async () => {
   if (!window._fsReady || !window._fsUid || !navigator.onLine) return;
   const flushed = await flushPendingFirestoreOps();
   if (flushed) await syncFromFirestore();
-}, 60 * 1000);
+}, 5 * 1000);

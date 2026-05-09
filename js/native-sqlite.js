@@ -1,14 +1,38 @@
 (function initNativeSqliteBridge() {
+  const capacitorSqlite = () => window.Capacitor?.Plugins?.SjSqlite || null;
   const invoke = (...args) => {
     const coreInvoke = window.__TAURI__?.core?.invoke;
     const legacyInvoke = window.__TAURI__?.invoke;
     const fn = coreInvoke || legacyInvoke;
-    if (!fn) throw new Error('Tauri invoke is not available');
+    if (!fn) throw new Error('Native invoke is not available');
     return fn(...args);
   };
 
   const hasTauri = () => !!(window.__TAURI__?.core?.invoke || window.__TAURI__?.invoke);
-  if (!hasTauri()) return;
+  const hasCapacitorSqlite = () => !!capacitorSqlite();
+  if (!hasTauri() && !hasCapacitorSqlite()) return;
+
+  const callNative = (command, payload = {}) => {
+    const plugin = capacitorSqlite();
+    if (plugin) {
+      const methods = {
+        sqlite_init: 'init',
+        sqlite_get_collection: 'getCollection',
+        sqlite_put_collection: 'putCollection',
+        sqlite_import_snapshot: 'importSnapshot',
+        sqlite_status: 'status',
+        sqlite_get_sync_queue: 'getSyncQueue',
+        sqlite_replace_sync_queue: 'replaceSyncQueue',
+        sqlite_clear_sync_queue: 'clearSyncQueue'
+      };
+      const method = methods[command];
+      if (!method || typeof plugin[method] !== 'function') {
+        throw new Error(`Capacitor SQLite method is not available: ${command}`);
+      }
+      return plugin[method](payload);
+    }
+    return invoke(command, payload);
+  };
 
   const collections = ['products', 'sales', 'transactions', 'installments', 'debts', 'repairs', 'warranties', 'workers'];
   const state = {
@@ -42,16 +66,16 @@
     if (!uid) return false;
     if (state.loading.has(uid)) return state.loading.get(uid);
     const task = (async () => {
-      await invoke('sqlite_init');
-      const status = await invoke('sqlite_status', { uid });
+      await callNative('sqlite_init');
+      const status = await callNative('sqlite_status', { uid });
       state.status.set(uid, status?.ok ? status : { ok: true, collections: {} });
 
       await Promise.all(collections.map(async (col) => {
-        const response = await invoke('sqlite_get_collection', { uid, col });
+        const response = await callNative('sqlite_get_collection', { uid, col });
         if (response?.ok && Array.isArray(response.records)) setCollection(uid, col, response.records);
       }));
 
-      const queue = await invoke('sqlite_get_sync_queue', { uid });
+      const queue = await callNative('sqlite_get_sync_queue', { uid });
       state.queue.set(uid, queue?.ok && Array.isArray(queue.ops) ? queue.ops : []);
       state.ready = true;
       return true;
@@ -66,14 +90,14 @@
   }
 
   function syncWrite(command, payload) {
-    invoke(command, payload).catch((error) => {
+    callNative(command, payload).catch((error) => {
       console.warn(`nativeSqlite.${command}:`, error?.message || error);
     });
   }
 
   window.nativeSqlite = {
     async init(uid = currentUid()) {
-      await invoke('sqlite_init');
+      await callNative('sqlite_init');
       state.ready = true;
       if (uid) await ensureUser(uid);
       return { ok: true };
@@ -109,8 +133,8 @@
 
     async putCollection(uid = currentUid(), col, records = []) {
       setCollection(uid, col, records);
-      const response = await invoke('sqlite_put_collection', { uid, col, records });
-      const status = await invoke('sqlite_status', { uid });
+      const response = await callNative('sqlite_put_collection', { uid, col, records });
+      const status = await callNative('sqlite_status', { uid });
       if (status?.ok) state.status.set(uid, status);
       return response;
     },
@@ -123,8 +147,8 @@
 
     async importLocalSnapshot(uid = currentUid(), snapshot = {}) {
       Object.entries(snapshot || {}).forEach(([col, records]) => setCollection(uid, col, records));
-      const response = await invoke('sqlite_import_snapshot', { uid, snapshot });
-      const status = await invoke('sqlite_status', { uid });
+      const response = await callNative('sqlite_import_snapshot', { uid, snapshot });
+      const status = await callNative('sqlite_status', { uid });
       if (status?.ok) state.status.set(uid, status);
       return response;
     },
@@ -146,7 +170,7 @@
 
     async replaceSyncQueue(uid = currentUid(), ops = []) {
       state.queue.set(uid, clone(Array.isArray(ops) ? ops : []));
-      return invoke('sqlite_replace_sync_queue', { uid, ops: state.queue.get(uid) });
+      return callNative('sqlite_replace_sync_queue', { uid, ops: state.queue.get(uid) });
     },
 
     clearSyncQueueSync(uid = currentUid()) {
@@ -157,7 +181,7 @@
 
     async clearSyncQueue(uid = currentUid()) {
       state.queue.set(uid, []);
-      return invoke('sqlite_clear_sync_queue', { uid });
+      return callNative('sqlite_clear_sync_queue', { uid });
     }
   };
 
