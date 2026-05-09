@@ -757,3 +757,23 @@ tr:hover td{background:#FAFAFE}
     justify-content: space-between;
   }
 }
+
+/* Disable motion effects across desktop and mobile builds. */
+*,
+*::before,
+*::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+.btn-primary:hover,
+.btn:hover,
+.icon-btn:hover,
+.nav-btn:hover,
+.pos-card:hover,
+.tab-btn:hover,
+.auth-btn:hover,
+.img-upload-area:hover {
+  transform: none !important;
+}

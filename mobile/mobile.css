@@ -453,3 +453,22 @@ html.mobile-app.mobile-menu-open .mobile-scan-fab {
     grid-template-columns: 1fr !important;
   }
 }
+
+html.mobile-app *,
+html.mobile-app *::before,
+html.mobile-app *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+html.mobile-app .btn:hover,
+html.mobile-app .icon-btn:hover,
+html.mobile-app .nav-btn:hover,
+html.mobile-app .mobile-drawer-item:hover,
+html.mobile-app .pos-card:hover,
+html.mobile-app .tab-btn:hover,
+html.mobile-app .auth-btn:hover,
+html.mobile-app .img-upload-area:hover {
+  transform: none !important;
+}
