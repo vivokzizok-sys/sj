@@ -5,6 +5,7 @@ const _cache = {};
 const _baseline = {};
 let _sqliteReady = false;
 let _sqliteLastImportedUid = null;
+let _sqlitePreparedUid = null;
 let _sqliteStatusCache = new Map();
 const BROWSER_STORAGE_PREFIX = 'sj_mobile_v1';
 
@@ -78,9 +79,14 @@ function canWriteSqliteQueueSync() {
 async function ensureSqliteReady() {
   const api = sqliteApi();
   if (!api?.init) return false;
-  if (_sqliteReady) return true;
+  const uid = currentDbUserUid();
+  if (_sqliteReady && (!uid || _sqlitePreparedUid === uid || !api.prepareUser)) return true;
   try {
     await api.init();
+    if (uid && api.prepareUser) {
+      await api.prepareUser(uid);
+      _sqlitePreparedUid = uid;
+    }
     _sqliteReady = true;
     return true;
   } catch (e) {
@@ -524,6 +530,7 @@ async function syncFromFirestore() {
       }
     }
     console.log(`✅ تمت المزامنة — ${totalDocs} سجل`);
+    window.dispatchEvent(new CustomEvent('sj:data-synced', { detail: { totalDocs } }));
   } catch (e) {
     console.error('syncFromFirestore خطأ:', e);
   }
@@ -699,3 +706,9 @@ window.addEventListener('online', async () => {
     if (flushed) await syncFromFirestore();
   }
 });
+
+setInterval(async () => {
+  if (!window._fsReady || !window._fsUid || !navigator.onLine) return;
+  const flushed = await flushPendingFirestoreOps();
+  if (flushed) await syncFromFirestore();
+}, 60 * 1000);

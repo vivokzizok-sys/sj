@@ -307,7 +307,7 @@ function showBcDebtOptions(d) {
     document.body.appendChild(ov);
   }
   document.getElementById('bc-debt-name').textContent = d.customerName + (d.phone ? ' â€” ' + d.phone : '');
-  document.getElementById('bc-debt-info').innerHTML   = `Ø§Ù„Ù…ØªØ¨Ù‚ÙŠ: <b style="color:var(--red)">${fmt(d.remaining)} DA</b> Ù…Ù† Ø£ØµÙ„ ${fmt(d.totalDebt)} DA`;
+  document.getElementById('bc-debt-info').innerHTML   = `Ø§Ù„Ù…ØªØ¨Ù‚ÙŠ: <b style="color:var(--red)">${fmt(d.remaining)}</b> Ù…Ù† Ø£ØµÙ„ ${fmt(d.totalDebt)}`;
   document.getElementById('bc-debt-pay-btn').onclick  = () => { closeModal('bc-debt-ov'); openDebtPay(d.id); };
   document.getElementById('bc-debt-all-btn').onclick  = () => { closeModal('bc-debt-ov'); openDebtPayAll(d.id); };
   openModal('bc-debt-ov');
@@ -340,7 +340,7 @@ function showBcInstOptions(inst) {
     document.body.appendChild(ov);
   }
   document.getElementById('bc-inst-name').textContent = inst.customerName + (inst.phone ? ' â€” ' + inst.phone : '');
-  document.getElementById('bc-inst-info').innerHTML   = `Ø§Ù„Ù‚Ø³Ø· Ø§Ù„Ø´Ù‡Ø±ÙŠ: <b style="color:var(--primary)">${fmt(inst.monthlyPayment)} DA</b> Â· Ø§Ù„Ù…ØªØ¨Ù‚ÙŠ: <b style="color:var(--red)">${fmt(inst.remaining)} DA</b>`;
+  document.getElementById('bc-inst-info').innerHTML   = `Ø§Ù„Ù‚Ø³Ø· Ø§Ù„Ø´Ù‡Ø±ÙŠ: <b style="color:var(--primary)">${fmt(inst.monthlyPayment)}</b> Â· Ø§Ù„Ù…ØªØ¨Ù‚ÙŠ: <b style="color:var(--red)">${fmt(inst.remaining)}</b>`;
   document.getElementById('bc-inst-pay-btn').onclick  = () => { closeModal('bc-inst-ov'); openInstPay(inst.id); };
   document.getElementById('bc-inst-all-btn').onclick  = () => { closeModal('bc-inst-ov'); openInstPayAll(inst.id); };
   openModal('bc-inst-ov');
@@ -386,7 +386,7 @@ function checkInstallmentReminders() {
     reminders.push(
       `👤 <b>${inst.customerName}</b>\n` +
       `📱 الهاتف: ${inst.phone || '—'}\n` +
-      `💰 القسط: ${fmt(inst.monthlyPayment)} DA\n` +
+      `💰 القسط: ${fmt(inst.monthlyPayment)}\n` +
       `📦 المنتج: ${inst.productName || '—'}\n` +
       `${status}`
     );

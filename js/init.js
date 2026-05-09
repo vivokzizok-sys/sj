@@ -118,3 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
   startTopDateTicker();
   bootInitialPosPage();
 });
+
+window.addEventListener('sj:data-synced', () => {
+  const activeId = document.querySelector('.page.active')?.id?.replace('page-', '');
+  if (!activeId || activeId === 'cashier') return;
+  if (typeof refreshAll === 'function') refreshAll();
+});

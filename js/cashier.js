@@ -143,7 +143,7 @@ function cashierManualSearch(){
         <div style="font-weight:700;font-size:13px">${p.name}</div>
         <div style="font-size:11px;color:var(--text-gray)">${p.barcode||''} ${p.color?'· '+p.color:''}</div>
       </div>
-      <div style="font-weight:800;color:var(--primary)">${fmt(p.price)} DA</div>
+      <div style="font-weight:800;color:var(--primary)">${fmt(p.price)}</div>
     </div>`).join('');
 }
 
@@ -160,7 +160,7 @@ function confirmCashierDiscount(){
   _cashierDiscount = amount;
   updateCashierUI();
   closeModal('cashier-discount-ov');
-  toast(`✅ تم تطبيق خصم ${fmt(amount)} DA`);
+  toast(`✅ تم تطبيق خصم ${fmt(amount)}`);
 }
 
 function openCashierSale(type){
@@ -168,7 +168,7 @@ function openCashierSale(type){
   _cashierSaleType = type;
   const total = getCashierTotal();
 
-  document.getElementById('cashier-sale-total').textContent = fmt(total)+' DA';
+  document.getElementById('cashier-sale-total').textContent = fmt(total);
   const titles = {cash:'💵 بيع كاش', installment:'📅 بيع بالتقسيط', credit:'💳 بيع كريدي'};
   document.getElementById('cashier-sale-title').textContent = titles[type]||'تأكيد البيع';
 
@@ -196,14 +196,14 @@ function calcCashierInstall(){
   const remain = Math.max(0,total-down);
   const monthly = remain>0?Math.ceil(remain/months):0;
   const totalEl = document.getElementById('cashier-sale-total');
-  if(totalEl && _cashierSaleType === 'installment') totalEl.textContent = fmt(total)+' DA';
+  if(totalEl && _cashierSaleType === 'installment') totalEl.textContent = fmt(total);
   const el = document.getElementById('ci-summary');
   if(el) el.innerHTML=`
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>إجمالي الكاشير:</span><b>${fmt(baseTotal)} DA</b></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>الربح الإضافي:</span><b style="color:#276749">+ ${fmt(extra)} DA</b></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px;padding-top:5px;border-top:1px solid var(--border)"><span>إجمالي التقسيط:</span><b style="color:var(--primary)">${fmt(total)} DA</b></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>المتبقي:</span><b>${fmt(remain)} DA</b></div>
-    <div style="display:flex;justify-content:space-between"><span>القسط الشهري:</span><b style="color:var(--primary)">${fmt(monthly)} DA × ${months}</b></div>`;
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>إجمالي الكاشير:</span><b>${fmt(baseTotal)}</b></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>الربح الإضافي:</span><b style="color:#276749">+ ${fmt(extra)}</b></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;padding-top:5px;border-top:1px solid var(--border)"><span>إجمالي التقسيط:</span><b style="color:var(--primary)">${fmt(total)}</b></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>المتبقي:</span><b>${fmt(remain)}</b></div>
+    <div style="display:flex;justify-content:space-between"><span>القسط الشهري:</span><b style="color:var(--primary)">${fmt(monthly)}</b></div>`;
 }
 
 async function confirmCashierSale(){
@@ -316,7 +316,7 @@ async function confirmCashierSale(){
       date:nowISO(), saleId:instSaleId
     });
     await window.autoPrintInstallmentContract?.(lastInst);
-    tg(`📅 <b>كاشير — تقسيط</b>\nالزبون: ${name}\n${productNames}\nالسعر الأصلي: ${fmt(installmentBase)}\nالربح الإضافي: ${fmt(extra)}\nالإجمالي: ${fmt(installmentTotal)}\nمقدم: ${fmt(down)}\nقسط: ${fmt(monthly)}×${months}\nالتاريخ: ${todayStr()}`);
+    tg(`📅 <b>كاشير — تقسيط</b>\nالزبون: ${name}\n${productNames}\nالسعر الأصلي: ${fmt(installmentBase)}\nالربح الإضافي: ${fmt(extra)}\nالإجمالي: ${fmt(installmentTotal)}\nمقدم: ${fmt(down)}\nالقسط الشهري: ${fmt(monthly)}\nعدد الأشهر: ${months}\nالتاريخ: ${todayStr()}`);
     toast('✅ تم تسجيل التقسيط');
   }
 

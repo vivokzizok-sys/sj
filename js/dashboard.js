@@ -477,7 +477,7 @@ function returnSale(saleId, typeKey){
 
   showConfirm(
     `↩ إرجاع ${typeLabel}`,
-    `هل تريد إرجاع "${sale.productName||''}" — ${fmt(amount)} DA؟
+    `هل تريد إرجاع "${sale.productName||''}" — ${fmt(amount)}؟
 سيتم تصحيح الأرقام تلقائياً.`,
     ()=>{
       const sales = DB.get('sales');
