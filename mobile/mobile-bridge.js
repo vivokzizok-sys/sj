@@ -98,9 +98,64 @@
     setNavText('button[onclick*="settings"]', '\u0625\u0639\u062f\u0627\u062f\u0627\u062a');
   }
 
+  function closeMobileMenu() {
+    document.documentElement.classList.remove('mobile-menu-open');
+    document.getElementById('mobile-menu-btn')?.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleMobileMenu() {
+    const root = document.documentElement;
+    const open = !root.classList.contains('mobile-menu-open');
+    root.classList.toggle('mobile-menu-open', open);
+    document.getElementById('mobile-menu-btn')?.setAttribute('aria-expanded', String(open));
+  }
+
+  function ensureMenuButton() {
+    const topbarRight = document.querySelector('.topbar-right');
+    if (!topbarRight || document.getElementById('mobile-menu-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'mobile-menu-btn';
+    btn.className = 'mobile-menu-btn';
+    btn.type = 'button';
+    btn.title = '\u0627\u0644\u0642\u0627\u0626\u0645\u0629';
+    btn.setAttribute('aria-label', '\u0641\u062a\u062d \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0648\u0627\u062c\u0647\u0627\u062a');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span></span>';
+    btn.addEventListener('click', toggleMobileMenu);
+
+    const sync = document.getElementById('sync-indicator');
+    topbarRight.insertBefore(btn, sync || topbarRight.firstChild);
+  }
+
+  function ensureMenuBackdrop() {
+    if (document.getElementById('mobile-menu-backdrop')) return;
+    const backdrop = document.createElement('div');
+    backdrop.id = 'mobile-menu-backdrop';
+    backdrop.className = 'mobile-menu-backdrop';
+    backdrop.addEventListener('click', closeMobileMenu);
+    document.body.appendChild(backdrop);
+  }
+
+  function bindMenuCloseEvents() {
+    const nav = document.querySelector('.sidebar-nav');
+    if (nav?.dataset.mobileMenuBound) return;
+    nav?.addEventListener('click', (event) => {
+      if (event.target.closest('.nav-btn')) closeMobileMenu();
+    });
+    if (nav) nav.dataset.mobileMenuBound = '1';
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeMobileMenu();
+    });
+  }
+
   function initMobileUi() {
+    ensureMenuBackdrop();
+    ensureMenuButton();
     ensureScanButton();
     enhanceMobileNavigation();
+    bindMenuCloseEvents();
   }
 
   if (document.readyState === 'loading') {
