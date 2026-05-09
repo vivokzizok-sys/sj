@@ -1,0 +1,13 @@
+{
+  "name": "sj-store-pro-mobile",
+  "private": true,
+  "version": "1.0.14",
+  "dependencies": {
+    "@capacitor/barcode-scanner": "^2.2.6",
+    "@capacitor/core": "^7.6.4"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.6.4",
+    "@capacitor/cli": "^7.6.4"
+  }
+}

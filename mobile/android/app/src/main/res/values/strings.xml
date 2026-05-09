@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">برنامج تسيير المحلات</string>
+    <string name="title_activity_main">برنامج تسيير المحلات</string>
+    <string name="package_name">com.sjstore.pro.mobile</string>
+    <string name="custom_url_scheme">com.sjstore.pro.mobile</string>
+</resources>

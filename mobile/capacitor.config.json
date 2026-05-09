@@ -1,0 +1,15 @@
+{
+  "appId": "com.sjstore.pro.mobile",
+  "appName": "برنامج تسيير المحلات",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "CapacitorBarcodeScanner": {
+      "android": {
+        "scanningLibrary": "mlkit"
+      }
+    }
+  }
+}

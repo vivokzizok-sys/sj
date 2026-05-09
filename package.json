@@ -1,0 +1,28 @@
+{
+  "name": "sj-store-pro",
+  "version": "1.0.14",
+  "description": "SJ STORE Pro - نظام إدارة محل الهواتف",
+  "author": "SJ STORE",
+  "license": "MIT",
+  "scripts": {
+    "start": "tauri dev",
+    "build": "tauri build",
+    "release": "tauri build",
+    "tauri:prepare": "node scripts/tauri-prepare.mjs",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "mobile:prepare": "node mobile/prepare.mjs",
+    "mobile:sync": "npm run mobile:prepare && cd mobile && cap sync",
+    "mobile:add:android": "npm run mobile:prepare && cd mobile && cap add android",
+    "mobile:build:android": "npm run mobile:sync && cd mobile/android && ./gradlew assembleRelease"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.6.4",
+    "@capacitor/cli": "^7.6.4",
+    "@tauri-apps/cli": "^2.11.1"
+  },
+  "dependencies": {
+    "@capacitor/barcode-scanner": "^2.2.6",
+    "@capacitor/core": "^7.6.4"
+  }
+}

@@ -1,0 +1,92 @@
+name: Build Android Release APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-android-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android build tools
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync Android project
+        run: npm run mobile:sync
+
+      - name: Build unsigned release APK
+        working-directory: mobile/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+
+      - name: Sign release APKs
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/35.0.0"
+          OUTPUT_DIR="mobile/android/app/build/outputs/apk/release"
+          SIGNED_DIR="$OUTPUT_DIR/signed"
+          KEYSTORE_FILE="$RUNNER_TEMP/android-release-key.jks"
+          KEYSTORE_BASE64="$(printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n ')"
+          KEYSTORE_PASSWORD="$(printf '%s' "$ANDROID_KEYSTORE_PASSWORD" | tr -d '\r\n ')"
+          KEY_ALIAS="$(printf '%s' "$ANDROID_KEY_ALIAS" | tr -d '\r\n ')"
+          KEY_PASSWORD="$(printf '%s' "$ANDROID_KEY_PASSWORD" | tr -d '\r\n ')"
+
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
+          mkdir -p "$SIGNED_DIR"
+
+          for UNSIGNED_APK in "$OUTPUT_DIR"/*-release-unsigned.apk; do
+            [ -f "$UNSIGNED_APK" ] || continue
+            BASE_NAME="$(basename "$UNSIGNED_APK" -unsigned.apk)"
+            ALIGNED_APK="$SIGNED_DIR/${BASE_NAME}-aligned.apk"
+            SIGNED_APK="$SIGNED_DIR/${BASE_NAME}-signed.apk"
+
+            "$BUILD_TOOLS/zipalign" -f -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
+            "$BUILD_TOOLS/apksigner" sign \
+              --ks "$KEYSTORE_FILE" \
+              --ks-key-alias "$KEY_ALIAS" \
+              --ks-pass "pass:$KEYSTORE_PASSWORD" \
+              --key-pass "pass:$KEY_PASSWORD" \
+              --out "$SIGNED_APK" \
+              "$ALIGNED_APK"
+
+            "$BUILD_TOOLS/apksigner" verify --print-certs "$SIGNED_APK"
+          done
+
+          ls -lh "$SIGNED_DIR"
+          echo "SIGNED_APK_DIR=$SIGNED_DIR" >> "$GITHUB_ENV"
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sj-store-pro-mobile-release-apks
+          path: ${{ env.SIGNED_APK_DIR }}/*-signed.apk

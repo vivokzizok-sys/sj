@@ -1,0 +1,39 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "\u0628\u0631\u0646\u0627\u0645\u062c \u062a\u0633\u064a\u064a\u0631 \u0627\u0644\u0645\u062d\u0644\u0627\u062a",
+  "version": "1.0.0",
+  "identifier": "com.sjstore.pro",
+  "build": {
+    "frontendDist": "../tauri-dist",
+    "beforeDevCommand": "npm run tauri:prepare",
+    "beforeBuildCommand": "npm run tauri:prepare"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "\u0628\u0631\u0646\u0627\u0645\u062c \u062a\u0633\u064a\u064a\u0631 \u0627\u0644\u0645\u062d\u0644\u0627\u062a",
+        "width": 800,
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "nsis",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  }
+}
