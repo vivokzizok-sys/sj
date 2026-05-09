@@ -128,6 +128,75 @@
     topbarRight.insertBefore(btn, sync || topbarRight.firstChild);
   }
 
+  const mobilePages = [
+    { id: 'dashboard', label: '\u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u062d\u0643\u0645', shortLabel: '\u0644\u0648\u062d\u0629', icon: '\ud83d\udcca', selector: '#btn-dashboard' },
+    { id: 'inventory', label: '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0645\u062e\u0632\u0648\u0646', shortLabel: '\u0645\u062e\u0632\u0648\u0646', icon: '\ud83d\udce6', selector: '#btn-inventory' },
+    { id: 'pos', label: '\u0646\u0642\u0637\u0629 \u0627\u0644\u0628\u064a\u0639', shortLabel: '\u0628\u064a\u0639', icon: '\ud83d\uded2', selector: '#btn-pos' },
+    { id: 'installments', label: '\u0632\u0628\u0627\u0626\u0646 \u0627\u0644\u062a\u0642\u0633\u064a\u0637', shortLabel: '\u062a\u0642\u0633\u064a\u0637', icon: '\ud83d\udcc5', selector: 'button[onclick*="installments"]' },
+    { id: 'debts', label: '\u0633\u062c\u0644 \u0627\u0644\u062f\u064a\u0648\u0646', shortLabel: '\u062f\u064a\u0648\u0646', icon: '\ud83d\udccb', selector: 'button[onclick*="debts"]' },
+    { id: 'repairs', label: '\u062a\u0635\u0644\u064a\u062d \u0627\u0644\u0623\u0639\u0637\u0627\u0644', shortLabel: '\u062a\u0635\u0644\u064a\u062d', icon: '\ud83d\udd27', selector: 'button[onclick*="repairs"]' },
+    { id: 'warranties', label: '\u0633\u062c\u0644 \u0627\u0644\u0636\u0645\u0627\u0646', shortLabel: '\u0636\u0645\u0627\u0646', icon: '\ud83d\udee1\ufe0f', selector: '#btn-warranties' },
+    { id: 'cashier', label: '\u0627\u0644\u0643\u0627\u0634\u064a\u0631', shortLabel: '\u0643\u0627\u0634\u064a\u0631', icon: '\ud83d\udda5\ufe0f', selector: 'button[onclick*="cashier"]' },
+    { id: 'worker', label: '\u0627\u0644\u0639\u0627\u0645\u0644', shortLabel: '\u0639\u0627\u0645\u0644', icon: '\ud83d\udc77', selector: 'button[onclick*="worker"]' },
+    { id: 'settings', label: '\u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a', shortLabel: '\u0625\u0639\u062f\u0627\u062f\u0627\u062a', icon: '\u2699\ufe0f', selector: 'button[onclick*="settings"]' }
+  ];
+
+  function setActiveDrawerItem(pageId) {
+    document.querySelectorAll('.mobile-drawer-item').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.page === pageId);
+    });
+  }
+
+  function navigateMobile(page) {
+    const originalButton = document.querySelector(page.selector);
+    if (page.id === 'dashboard' && typeof window.openDashboard === 'function') {
+      window.openDashboard(originalButton);
+    } else if (typeof window.goPage === 'function') {
+      window.goPage(page.id, originalButton);
+    } else if (typeof goPage === 'function') {
+      goPage(page.id, originalButton);
+    } else {
+      originalButton?.click();
+    }
+    setActiveDrawerItem(page.id);
+    closeMobileMenu();
+  }
+
+  function ensureMobileDrawer() {
+    if (document.getElementById('mobile-drawer')) return;
+    const drawer = document.createElement('aside');
+    drawer.id = 'mobile-drawer';
+    drawer.className = 'mobile-drawer';
+    drawer.setAttribute('aria-label', '\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0648\u0627\u062c\u0647\u0627\u062a');
+
+    const title = document.createElement('div');
+    title.className = 'mobile-drawer-title';
+    title.innerHTML = '<span>\u0627\u0644\u0648\u0627\u062c\u0647\u0627\u062a</span>';
+
+    const close = document.createElement('button');
+    close.className = 'mobile-drawer-close';
+    close.type = 'button';
+    close.textContent = '\u00d7';
+    close.setAttribute('aria-label', '\u0625\u063a\u0644\u0627\u0642 \u0627\u0644\u0642\u0627\u0626\u0645\u0629');
+    close.addEventListener('click', closeMobileMenu);
+    title.appendChild(close);
+
+    const nav = document.createElement('nav');
+    nav.className = 'mobile-drawer-nav';
+    mobilePages.forEach((page) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `mobile-drawer-item${page.id === 'pos' ? ' active' : ''}`;
+      btn.dataset.page = page.id;
+      btn.innerHTML = `<span class="ni">${page.icon}</span><span>${page.label}</span>`;
+      btn.addEventListener('click', () => navigateMobile(page));
+      nav.appendChild(btn);
+    });
+
+    drawer.append(title, nav);
+    document.body.appendChild(drawer);
+  }
+
   function ensureMenuBackdrop() {
     if (document.getElementById('mobile-menu-backdrop')) return;
     const backdrop = document.createElement('div');
@@ -138,13 +207,6 @@
   }
 
   function bindMenuCloseEvents() {
-    const nav = document.querySelector('.sidebar-nav');
-    if (nav?.dataset.mobileMenuBound) return;
-    nav?.addEventListener('click', (event) => {
-      if (event.target.closest('.nav-btn')) closeMobileMenu();
-    });
-    if (nav) nav.dataset.mobileMenuBound = '1';
-
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') closeMobileMenu();
     });
@@ -153,6 +215,7 @@
   function initMobileUi() {
     ensureMenuBackdrop();
     ensureMenuButton();
+    ensureMobileDrawer();
     ensureScanButton();
     enhanceMobileNavigation();
     bindMenuCloseEvents();
